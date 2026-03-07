@@ -6,6 +6,7 @@ Codex notify hook — Codex 完成 turn 时：
 
 配置：通过环境变量或修改下方默认值
   CODEX_AGENT_CHAT_ID   — Chat ID (Telegram/Discord/WhatsApp etc.)
+  CODEX_AGENT_ACCOUNT   — OpenClaw account（可选，如 codex）
   CODEX_AGENT_NAME      — OpenClaw agent 名称（默认 main）
 """
 
@@ -20,6 +21,7 @@ LOG_FILE = "/tmp/codex_notify_log.txt"
 # 从环境变量读取，fallback 到默认值（方便部署时不改代码）
 CHAT_ID = os.environ.get("CODEX_AGENT_CHAT_ID", "YOUR_CHAT_ID")
 CHANNEL = os.environ.get("CODEX_AGENT_CHANNEL", "telegram")
+ACCOUNT = (os.environ.get("CODEX_AGENT_ACCOUNT") or "").strip()
 AGENT_NAME = os.environ.get("CODEX_AGENT_NAME", "main")
 
 
@@ -31,16 +33,22 @@ def log(msg: str):
         pass  # 日志写入失败不应影响主流程
 
 
+def with_account(args: list[str]) -> list[str]:
+    if ACCOUNT:
+        return [*args, "--account", ACCOUNT]
+    return args
+
+
 def notify_user(msg: str) -> bool:
     """发送 Telegram 通知，返回是否成功启动进程"""
     try:
         proc = subprocess.Popen(
-            [
+            with_account([
                 "openclaw", "message", "send",
                 "--channel", CHANNEL,
                 "--target", CHAT_ID,
                 "--message", msg,
-            ],
+            ]),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -63,14 +71,14 @@ def wake_agent(msg: str) -> bool:
     """唤醒 OpenClaw agent，返回是否成功启动进程"""
     try:
         proc = subprocess.Popen(
-            [
+            with_account([
                 "openclaw", "agent",
                 "--agent", AGENT_NAME,
                 "--message", msg,
                 "--deliver",
                 "--channel", CHANNEL,
                 "--timeout", "120",
-            ],
+            ]),
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Optional `CODEX_AGENT_ACCOUNT` support: when set, hooks append `--account <value>` to `openclaw message send` and `openclaw agent`
+
+### Changed
+- `INSTALL.md` and `SKILL.md`: documented optional multi-account channel configuration
+
 ## [0.2.0] - 2026-02-26
 
 ### Fixed

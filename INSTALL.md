@@ -16,7 +16,7 @@
 ```bash
 # 方式 1：git clone
 cd ~/.openclaw/workspace/skills/
-git clone https://github.com/dztabel-happy/codex-agent.git
+git clone https://github.com/tsymr/codex-agent.git
 
 # 方式 2：手动复制（如果你已经下载了）
 cp -r /path/to/codex-agent ~/.openclaw/workspace/skills/codex-agent
@@ -43,7 +43,7 @@ notify = ["python3", "/Users/你的用户名/.openclaw/workspace/skills/codex-ag
 
 ## 第三步：配置通知目标
 
-有两种方式设置 Telegram Chat ID 和 agent 名称：
+有两种方式设置 Telegram Chat ID、可选的 channel account，以及 agent 名称：
 
 ### 方式 A：环境变量（推荐，不改代码）
 
@@ -52,6 +52,7 @@ notify = ["python3", "/Users/你的用户名/.openclaw/workspace/skills/codex-ag
 ```bash
 export CODEX_AGENT_CHAT_ID="你的Chat_ID"
 export CODEX_AGENT_CHANNEL="telegram"   # 支持 telegram / discord / whatsapp / slack 等 OpenClaw 通道
+export CODEX_AGENT_ACCOUNT="codex"      # 可选：指定 OpenClaw account；不设则不传 --account
 export CODEX_AGENT_NAME="main"          # OpenClaw agent 名称，通常是 main
 ```
 
@@ -65,12 +66,14 @@ export CODEX_AGENT_NAME="main"          # OpenClaw agent 名称，通常是 main
 ```python
 CHAT_ID = os.environ.get("CODEX_AGENT_CHAT_ID", "你的Chat_ID")
 CHANNEL = os.environ.get("CODEX_AGENT_CHANNEL", "telegram")
+ACCOUNT = (os.environ.get("CODEX_AGENT_ACCOUNT") or "").strip()
 ```
 
 编辑 `hooks/pane_monitor.sh`，修改：
 ```bash
 CHAT_ID="${CODEX_AGENT_CHAT_ID:-你的Chat_ID}"
 CHANNEL="${CODEX_AGENT_CHANNEL:-telegram}"
+ACCOUNT="${CODEX_AGENT_ACCOUNT:-}"
 ```
 
 ## 第四步：配置 OpenClaw session 重置
@@ -115,10 +118,10 @@ codex --version
 # 2. tmux 可用
 tmux -V
 
-# 3. Telegram 通知可发送（替换 YOUR_CHAT_ID）
+# 3. Telegram 通知可发送（替换 YOUR_CHAT_ID；如需指定账号再追加 --account codex）
 openclaw message send --channel telegram --target YOUR_CHAT_ID --message "✅ codex-agent 通知测试"
 
-# 4. OpenClaw agent 可唤醒
+# 4. OpenClaw agent 可唤醒（如需指定账号再追加 --account codex）
 openclaw agent --agent main --message "✅ codex-agent 唤醒测试" --deliver --channel telegram --timeout 10
 
 # 5. Codex notify hook 可触发（在任意 git 目录下）
